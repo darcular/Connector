@@ -1,0 +1,337 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>Unity Web Player | MBC</title>
+        <script src="../example/js/Connector.js"> </script>
+        <script src="qrcode.js"></script>
+		<script type='text/javascript' src='https://ssl-webplayer.unity3d.com/download_webplayer-3.x/3.0/uo/jquery.min.js'></script>
+		<script type="text/javascript">
+		<!--
+		var unityObjectUrl = "http://webplayer.unity3d.com/download_webplayer-3.x/3.0/uo/UnityObject2.js";
+		if (document.location.protocol == 'https:')
+			unityObjectUrl = unityObjectUrl.replace("http://", "https://ssl-");
+		document.write('<script type="text\/javascript" src="' + unityObjectUrl + '"><\/script>');
+		-->
+		</script>
+        
+		<style type="text/css">
+		<!--
+		body {
+			font-family: Helvetica, Verdana, Arial, sans-serif;
+			background-color: white;
+			color: black;
+			text-align: center;
+		}
+		a:link, a:visited {
+			color: #000;
+		}
+		a:active, a:hover {
+			color: #666;
+		}
+		p.header {
+			font-size: small;
+		}
+		p.header span {
+			font-weight: bold;
+		}
+		p.footer {
+			font-size: x-small;
+		}
+		div.content {
+			margin: auto;
+			width: 960px;
+		}
+		div.broken,
+		div.missing {
+			margin: auto;
+			position: relative;
+			top: 50%;
+			width: 193px;
+		}
+		div.broken a,
+		div.missing a {
+			height: 63px;
+			position: relative;
+			top: -31px;
+		}
+		div.broken img,
+		div.missing img {
+			border-width: 0px;
+		}
+		div.broken {
+			display: none;
+		}
+		div#unityPlayer {
+			cursor: default;
+			height: 600px;
+			width: 960px;
+		}
+		-->
+		</style>
+	</head>
+
+	<body onload="main();">
+    &nbsp;
+    <div id="qrcode2" style="left:100pax;position:absolute; margin-top:20px; "></div>
+    <div id="player2" style="left:100pax;position:absolute; margin-top:20px; visibility:hidden;"></div>
+	&nbsp;
+    <div id="qrcode" style="left:1000px;position:absolute; margin-top:20px;"></div>
+    <div id="player1" style="left:100pax;position:absolute; margin-top:20px; visibility:hidden;"></div>
+		<div class="content">
+        	<div id="gameover" style="visibility:hidden; z-index:100;">
+            &nbsp;GameOver
+            </div>
+			<div id="unityPlayer">
+				<div class="missing">
+					<a href="http://unity3d.com/webplayer/" title="Unity Web Player. Install now!">
+						<img alt="Unity Web Player. Install now!" src="http://webplayer.unity3d.com/installation/getunity.png" width="193" height="63" />
+					</a>
+				</div>
+				<div class="broken">
+					<a href="http://unity3d.com/webplayer/" title="Unity Web Player. Install now! Restart your browser after install.">
+						<img alt="Unity Web Player. Install now! Restart your browser after install." src="http://webplayer.unity3d.com/installation/getunityrestart.png" width="193" height="63" />
+					</a>
+				</div>
+			</div>
+        </div>
+
+		<p class="footer">&laquo; created with <a href="http://unity3d.com/unity/" title="Go to unity3d.com">Unity</a> &raquo;</p>
+        
+       
+
+    <script language="javascript">
+    var player1;
+    var player2;
+	var playercoming=0;
+	var playermode=2;
+	var config = {
+				width: 960, 
+				height: 600,
+				params: { enableDebugging:"0" }
+				
+			};
+	var u = new UnityObject2(config);
+    var own = window.location.host;
+	//own="10.9.218.93:8080";
+    var path = window.location.pathname.substr(0,window.location.pathname.lastIndexOf('/'));
+    function main() {
+        player1 = new game.Connector();
+        player1.onServerConnect = function(id){
+//			console.log(id);
+            player1.id = id;
+            console.log(player1.id);
+            new QRCode(document.getElementById("qrcode"), "ws://"+own+path+"/mobilesocket"+","+player1.id);
+
+        };
+		//end of on server connection
+        player1.onServerClose = function(){
+            console.log("Do something here when server is closed");
+        };
+        player1.onPlayerConnect = function(){
+            //load unity
+			playercoming+=1;
+			checkPlayerComing();
+		// u.initPlugin(jQuery("#unityPlayer")[0], "builds.unity3d");
+        };
+        player1.onPlayerMessage = function(json){
+            var name=json.name;
+            if(name!=undefined){
+                player1.name=name;
+                var pl=document.getElementById("player1");
+                var qr=document.getElementById("qrcode");
+                qr.style.visibility="hidden";
+                pl.style.visibility="visible";
+                pl.innerHTML =player1.name+" is in";
+            }
+			if(playercoming==playermode){
+            var fire=json.fire;
+			var jump=json.jump;
+			var view_x=parseInt(json.View_X);
+			var view_y=parseInt(json.View_y);
+			var pos_x=parseInt(json.Pos_X);
+			//console.log("!"+pos_x);
+			var pos_y=parseInt(json.Pos_Y);
+			//u.getUnity().SendMessage("Character", "Call", pos_x.toString());
+			if(pos_x>5) pos_x=25;
+			else if(pos_x < -5) pos_x=-25;
+			else pos_x=0;
+			
+			if(pos_y>5)pos_y=-25;
+			else if(pos_y<-5)pos_y=25;
+			else pos_y=0;
+			
+			
+			
+			u.getUnity().SendMessage("Player1", "forwardBack", pos_y.toString());
+			u.getUnity().SendMessage("Player1", "leftRight", pos_x.toString());
+			
+			
+			u.getUnity().SendMessage("Player1", "lrRotate", view_x.toString());
+			u.getUnity().SendMessage("Player1", "udRotate", view_y.toString());
+			
+			console.log(jump);
+			if(jump=='true'){
+				console.log(jump);
+				u.getUnity().SendMessage("Player1","jumps","true");}
+			else u.getUnity().SendMessage("Player1","jumps","false");
+			//else u.getUnity().SendMessage("Player2","jumps","false");
+			
+			if(fire=='true')u.getUnity().SendMessage("Player1","fire","true");
+			//else u.getUnity().SendMessage("Player2","Fire","false");
+			}
+			
+        };
+        player1.onPlayerClose = function(){
+            console.log("player left");
+        };
+
+        player2 = new game.Connector();
+        player2.onServerConnect = function(id){
+//			console.log(id);
+            player2.id = id;
+            console.log(player2.id)
+            new QRCode(document.getElementById("qrcode2"), "ws://"+own+path+"/mobilesocket"+","+player2.id);
+//			var qrcode2 = new QRCode(document.getElementById("qrcode2"), {
+//            text : "ws://"+own+path+"/mobilesocket"+","+player2.id,
+//			width : 100,
+//			height : 100
+//			});
+//            var st="ws://"+own+path+"/mobilesocket"+","+id;
+//            console.log(st);
+//            qrcode2.makeCode(st);
+        };
+		//end of on server connection
+        player2.onServerClose = function(){
+            console.log("Do something here when server is closed");
+        };
+        player2.onPlayerConnect = function(){
+            playercoming+=1;
+			checkPlayerComing();
+        };
+        player2.onPlayerMessage = function(json){
+            var name=json.name;
+            if(name!=undefined){
+                player2.name=name;
+                var pl=document.getElementById("player2");
+                var qr=document.getElementById("qrcode2");
+                qr.style.visibility="hidden";
+                pl.style.visibility="visible";
+                pl.innerHTML=player2.name+" is in";
+            }
+
+			if(playercoming==playermode){
+            var fire=json.fire;
+			var jump=json.jump;
+			var view_x=parseInt(json.View_X);
+			var view_y=parseInt(json.View_y);
+			var pos_x=parseInt(json.Pos_X);
+			var pos_y=parseInt(json.Pos_Y);
+
+
+			//u.getUnity().SendMessage("Character", "Call", pos_x.toString());
+			if(pos_x>5)pos_x=25;
+			else if(pos_x<-5)pos_x=-25;
+			else pos_x=0;
+			
+			if(pos_y>5)pos_y=-25;
+			else if(pos_y<-5)pos_y=25;
+			else pos_y=0;
+			
+			u.getUnity().SendMessage("Player2", "forwardBack", pos_y.toString());
+			u.getUnity().SendMessage("Player2", "leftRight", pos_x.toString());
+
+			u.getUnity().SendMessage("Player2", "lrRotate", view_x.toString());
+			u.getUnity().SendMessage("Player2", "udRotate", view_y.toString());
+			
+			//console.log(jump);
+			if(jump=='true'){
+				//console.log(jump);
+				u.getUnity().SendMessage("Player2","jumps","true");}
+//			else u.getUnity().SendMessage("Player2","jumps","false");
+			//else u.getUnity().SendMessage("Player2","jumps","false");
+			
+			if(fire=='true')u.getUnity().SendMessage("Player2","fire","true");
+			}//else u.getUnity().SendMessage("Player2","Fire","false");
+        };
+        player2.onPlayerClose = function(){
+            console.log("player left");
+        };
+    }
+
+
+	function checkPlayerComing()
+	{
+		if(playercoming==playermode)u.initPlugin(jQuery("#unityPlayer")[0], "builds.unity3d");
+	}
+    </script>
+
+
+
+
+	<script type="text/javascript">
+		function UnityReady()
+	   {
+		  console.log("unity loaded");
+		};
+		function Callback(c)
+		{//Debug
+			//console.log(c);
+		};
+		function getGame()
+		{return u;}
+		
+	//score management
+
+	function player1Score(howmuch){
+		player1.player1mark=howmuch;
+//		player1.sendScore({your_health:howmuch, enemy_health:player2.player2mark});
+        player1.sendGameData({your_health:11, enemy_health:12});
+		}
+	function player2Score(howmuch)
+	{
+		player2.player2mark=howmuch;
+//		player2.sendScore({your_health:howmuch, enemy_health:player1.player2mark});
+        player2.sendGameData({your_health:11, enemy_health:12});
+	}	
+	function GameOver(whoDie)
+	{
+	    console.log("gameover");
+	    //player2 win the game
+        //mark is health
+	    player1.toPlayer1Mobile={your_health:player1.player1mark, enemy_health:player2.player2mark, game_end:true};
+        player2.toPlayer2Mobile={your_health:player2.player2mark, enemy_health:player1.player1mark, game_end:true};
+
+        player1.p1s = calScore(player1.player1mark, player2.player2mark);
+        player2.p2s = calScore(player2.player2mark, player1.player1mark);
+
+        player1.player1Score_ = {name:player1.name, score:player1.p1s};
+        player2.player2Score_ = {name:player2.name, score:player2.p2s};
+
+//        player1.sendScore(player1.player1Score_);
+//        player2.sendScore(player2.player2Score_);
+        player1.sendScore({"name":"player1", score : 100});
+        player2.sendScore({"name":"player2", score : 100});
+
+	    player1.sendGameData(player1.toPlayer1Mobile);
+        player2.sendGameData(player2.toPlayer2Mobile);
+
+	    var uni=document.getElementById("unityPlayer");
+	    //uni.parentNode.removeChild(uni);
+	
+	    var gameover=document.getElementById("gameover");
+	    gameover.style.visibility="visible";
+	}
+
+
+
+var calScore = function(selfScore, eniScore){
+    return (100-eniScore) * 100 + 100 * selfScore;
+}
+	</script>
+    <script src="gameControl.js"></script>
+</body>
+    
+</html>
+

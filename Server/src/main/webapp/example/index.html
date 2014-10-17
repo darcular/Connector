@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <script src="../js/Connector.js"></script>
+    <title>Example</title>
+</head>
+<body onload="main();">
+<input id="send" type="button" value="send"/>
+<script>
+    var player1;
+    //var player2;
+    function main() {
+
+        player1 = new game.Connector();
+        player1.onServerConnect = function(id){
+            console.log("Do something here when server is connected");
+        };
+        player1.onServerClose = function(){
+            console.log("Do something here when server is closed");
+        };
+        player1.onPlayerConnect = function(){
+            console.log("Do something here when player is connected");
+        };
+        player1.onPlayerMessage = function(json){
+            console.log("received data from the player");
+			var obj=JSON.parse(json);
+			console.log(obj);
+			
+        };
+        player1.onPlayerClose = function(){
+            console.log("player left");
+        };
+
+        /*player2 = new game.Connector();
+        player2.onServerConnect = function(id){
+            console.log("Do something here when server is connected");
+        };
+        player2.onServerClose = function(){
+            console.log("Do something here when server is closed");
+        };
+        player2.onPlayerConnect = function(){
+            console.log("Do something here when player is connected");
+        };
+        player2.onPlayerMessage = function(json){
+            console.log("received data from the player");
+        };
+        player2.onPlayerClose = function(){
+            console.log("player left");
+        };*/
+
+
+
+
+//        var socket = new WebSocket('ws://' + window.location.host + '/mobilesocket');
+//        socket.onopen = function(){
+//            console.log('mobile socket ready');
+//        }
+
+
+
+//        player1.init();
+//        connector = new game.Connector();
+////        connector.onServerConnected = function(id){console.log(id)};
+//        connector.on('connected', function(id){console.log(id);});
+//        console.log(connector);
+//        connector.init();
+
+//        var socket1 = new WebSocket('ws://' + window.location.host + '/websocket');
+//        var socket2 = new WebSocket('ws://' + window.location.host + '/websocket');
+
+
+
+//        var button = document.getElementById("send");
+//        button.onclick = function(){
+//            var request = {type:"request", value:"ready"};
+//            socket.send(JSON.stringify(request));
+//        }
+    }
+
+
+
+</script>
+</body>
+</html>

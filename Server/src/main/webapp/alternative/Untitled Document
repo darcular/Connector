@@ -1,0 +1,22 @@
+BeatingYourHeart
+================
+
+## How to launch the Server
+
+The Server code is under Server/ folder. Use tomcat7 to deploy it. 
+
+(NOTE: Tomcat6 and below do not support websocket. Tomcat7 or 8 is needed.)
+
+## How to launch the java api use case
+
+API path :Mobile/src/main/java/connectorAPI/
+
+Demo: Mobile/src/main/java/useCase/
+
+The main class for demo is JvmDemo.java. Launch it after launching the server in tomcat.
+
+## The web side
+
+Paht: Server/src/main/webapp/
+
+My javascript api is under js/ folder. And a use case is in index.html
